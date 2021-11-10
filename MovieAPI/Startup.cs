@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MovieAPI.Repositories;
+using MovieAPI.Services;
 using MovieAPI.Settings;
 using System;
 using System.Collections.Generic;
@@ -28,12 +29,18 @@ namespace MovieAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
             services.Configure<MongoDbSettings>(Configuration.GetSection("MongoDbSettings"));
+            services.Configure<SyncServiceSettings>(Configuration.GetSection("SyncServiceSettings"));
 
             services.AddSingleton<IMongoDbSettings>(provider =>
                 provider.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
+            services.AddSingleton<ISyncServiceSettings>(provider =>
+                provider.GetRequiredService<IOptions<SyncServiceSettings>>().Value);
+
             services.AddScoped<IMongoRepository<Movie>, MongoRepository<Movie>>();
+            services.AddScoped<ISyncService<Movie>, SyncService<Movie>>();
 
             services.AddControllers();
         }
