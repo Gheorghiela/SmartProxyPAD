@@ -1,5 +1,7 @@
 ﻿using Common.Models;
+using Common.Utilities;
 using Microsoft.Extensions.Hosting;
+using SyncNode.Settings;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,8 +15,15 @@ namespace SyncNode.Services
     {
         private readonly ConcurrentDictionary<Guid, SyncEntity> documents =
             new ConcurrentDictionary<Guid, SyncEntity>();
+        private readonly IMovieAPISettings _settings;
 
         private Timer _timer;
+         
+
+        public SyncWorkJobService(IMovieAPISettings settings)
+        {
+            _settings = settings;
+        }
 
         public void AddItem(SyncEntity entity)
         {
@@ -43,7 +52,35 @@ namespace SyncNode.Services
 
         private void DoSendWork(object state)
         {
+            foreach(var doc in documents)
+            {
+                SyncEntity entity = null;
+                var isPresent = documents.TryRemove(doc.Key, out entity);
 
+                if (isPresent)
+                {
+                    var receivers = _settings.Hosts.Where(x => !x.Contains(entity.Origin));
+
+                    foreach(var receiver in receivers)
+                    {
+                        // localhost:9001/api/movie
+                        var url = $"{receiver}/{entity.ObjectType}/sync";
+
+                        try
+                        {
+                            var result = HttpClientUtility.SendJson(entity.JsonData, url, entity.SyncType);
+
+                            if (!result.IsSuccessStatusCode)
+                            {
+                                // log error
+                            }
+                        } catch(Exception e)
+                        {
+                            //log
+                        }
+                    }
+                }
+            }
         }
     }
 }
