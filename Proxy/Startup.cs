@@ -30,6 +30,7 @@ namespace Proxy
             {
                 x.WithDictionaryHandle();
             });
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +42,12 @@ namespace Proxy
             }
 
             app.UseRouting();
+
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
 
             app.UseEndpoints(endpoints =>
             {

@@ -42,6 +42,14 @@ namespace MovieAPI
             services.AddScoped<IMongoRepository<Movie>, MongoRepository<Movie>>();
             services.AddScoped<ISyncService<Movie>, SyncService<Movie>>();
 
+            services.AddCors(option =>
+            {
+                option.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200/");
+                });
+            });
+
             services.AddControllers();
         }
 
@@ -54,6 +62,7 @@ namespace MovieAPI
             }
 
             app.UseRouting();
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 
@@ -61,6 +70,7 @@ namespace MovieAPI
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }

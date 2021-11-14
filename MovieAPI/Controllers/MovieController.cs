@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MovieAPI.Repositories;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace MovieAPI.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors("CorsPolicy")]
     [ApiController]
     public class MovieController : ControllerBase
     {

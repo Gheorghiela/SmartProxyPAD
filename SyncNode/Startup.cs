@@ -34,6 +34,13 @@ namespace SyncNode
 
             services.AddSingleton<SyncWorkJobService>();
             services.AddHostedService(provider => provider.GetService<SyncWorkJobService>());
+            services.AddCors(option =>
+            {
+                option.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200/");
+                });
+            });
 
             services.AddControllers();
         }
@@ -47,6 +54,8 @@ namespace SyncNode
             }
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 
